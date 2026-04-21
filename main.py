@@ -3,12 +3,14 @@ import os
 from dotenv import load_dotenv
 from langchain_core.prompts import PromptTemplate
 # from langchain_google_genai import GoogleGenerativeAI
-from langchain_ollama import ChatOllama
+# from langchain_ollama import ChatOllama
+from langchain_groq import ChatGroq
 # from langchain_openai import ChatOpenAI
 load_dotenv()
 
 # GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 def main():
     print("Hello from langchain-course!")
@@ -41,7 +43,7 @@ Musk's political activities, views, and statements have made Musk a polarizing f
     summary_prompt_template=PromptTemplate(template=summary_template, input_variables=["information"])
   #THis line is used to create a llm object with the model used and temperature used.
     # llm=GoogleGenerativeAI(model="gemini-2.0-flash", temperature=0,google_api_key=GEMINI_API_KEY)
-    llm=ChatOllama(model="gemma3:270m", temperature=0)
+    llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0, api_key=GROQ_API_KEY)
 
     #Chain is used to chain the components together like a pipeline
     chain=summary_prompt_template | llm #In this line the output of left component is passed to right component
