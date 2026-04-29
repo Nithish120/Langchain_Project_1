@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
-
+from typing import List
+from pydantic import BaseModel,Field
 from dotenv import load_dotenv
+from pydantic import BaseModel
 load_dotenv(dotenv_path=Path(__file__).with_name(".env"))
 
 from langchain.agents import create_agent
@@ -18,7 +20,7 @@ if not GROQ_API_KEY:
 
 
 #THis is a regular python function but to make it a tool we have to add @tool above it
-@tool
+@tool("search")
 def search(query:str)->str:
     """
     Tool that searches over internet
@@ -31,17 +33,37 @@ def search(query:str)->str:
     print(f"Searching for {query}")
     return tavily.search(query=query)
 
+
+class Source(BaseModel):
+    """
+    Schema for a source used by agent 
+    """
+    url:str =Field(description="The URL of the Source")
+
+
+class AgentResponse(BaseModel):
+    """Schema for agent response with answer and sources"""
+    answer:str=Field(description="The answer to agent's query")   
+    sources: List[Source]=Field(default_factory=list,description="List of sources used to generate the answer")
+
+
+
 llm=ChatGroq(model="llama-3.1-8b-instant", temperature=0, api_key=GROQ_API_KEY)
 tools=[search]
 agent=create_agent(
     model=llm,
     tools=tools,
     system_prompt=(
-        "You can use the search tool at most once. "
-        "After receiving tool output, provide a final answer and do not call tools again."
-        "Return the answer tidyly in bulletin format"
+        "You have exactly one available tool named `search`. "
+        "Never call any other tool name such as `brave_search`. "
+        "Use `search` when needed, then provide a final answer."
     ),
+    response_format=AgentResponse
+
 )
+
+
+
 def main():
     print("Hello from react-search-agent!")
     result=agent.invoke(
