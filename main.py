@@ -1,6 +1,8 @@
-def main():
-    print("Hello from rag!")
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 if __name__ == "__main__":
-    main()
+    print("Ingesting....")
